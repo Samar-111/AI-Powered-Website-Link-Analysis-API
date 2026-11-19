@@ -1,5 +1,6 @@
 import asyncio
 import json
+import os
 import re
 import time
 from typing import Dict, Any, Tuple
@@ -138,10 +139,26 @@ Ensure:
 - Ground all facts in the extracted website text wherever possible."""
 
 class LLMService:
-    def __init__(self, api_key: str = settings.GEMINI_API_KEY, model: str = settings.GEMINI_MODEL):
-        self.api_key = api_key
-        self.model = model
-        self.client = genai.Client(api_key=self.api_key) if self.api_key else None
+    def __init__(self, api_key: str = "", model: str = ""):
+        self._api_key = api_key
+        self._model = model
+        self._client = None
+
+    def _resolve_api_key(self) -> str:
+        key = self._api_key or os.getenv("GEMINI_API_KEY", "") or settings.GEMINI_API_KEY
+        return key.strip().strip('"').strip("'")
+
+    def _resolve_model(self) -> str:
+        return self._model or os.getenv("GEMINI_MODEL", "") or settings.GEMINI_MODEL
+
+    def _get_client(self) -> genai.Client:
+        key = self._resolve_api_key()
+        if not key:
+            raise ValueError("GEMINI_API_KEY is not configured in environment or .env file.")
+        if self._client is None or getattr(self, "_active_key", "") != key:
+            self._client = genai.Client(api_key=key)
+            self._active_key = key
+        return self._client
 
     def _clean_json_response(self, text: str) -> str:
         text = text.strip()
@@ -151,16 +168,15 @@ class LLMService:
         return text
 
     async def analyze_website_content(self, url: str, context: str) -> Tuple[BrandInfo, AnalysisData, Dict[str, Any]]:
-        if not self.api_key or not self.client:
-            raise ValueError("GEMINI_API_KEY is not configured in environment or .env file.")
-
+        client = self._get_client()
+        model = self._resolve_model()
         prompt = USER_PROMPT_TEMPLATE.format(context=context)
         start_time = time.perf_counter()
 
         try:
             response = await asyncio.to_thread(
-                self.client.models.generate_content,
-                model=self.model,
+                client.models.generate_content,
+                model=model,
                 contents=prompt,
                 config={
                     "system_instruction": SYSTEM_PROMPT,
@@ -186,7 +202,7 @@ class LLMService:
         total_tokens = getattr(usage, "total_token_count", 0) if usage else 0
 
         metadata = {
-            "model_used": self.model,
+            "model_used": model,
             "response_time_seconds": elapsed,
             "prompt_tokens": prompt_tokens,
             "completion_tokens": completion_tokens,
