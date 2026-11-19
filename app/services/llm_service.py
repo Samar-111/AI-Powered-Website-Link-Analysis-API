@@ -1,8 +1,9 @@
+import asyncio
 import json
 import re
 import time
 from typing import Dict, Any, Tuple
-import httpx
+from google import genai
 from app.config import settings
 from app.schemas import (
     BrandInfo,
@@ -140,7 +141,7 @@ class LLMService:
     def __init__(self, api_key: str = settings.GEMINI_API_KEY, model: str = settings.GEMINI_MODEL):
         self.api_key = api_key
         self.model = model
-        self.base_url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent"
+        self.client = genai.Client(api_key=self.api_key) if self.api_key else None
 
     def _clean_json_response(self, text: str) -> str:
         text = text.strip()
@@ -150,63 +151,46 @@ class LLMService:
         return text
 
     async def analyze_website_content(self, url: str, context: str) -> Tuple[BrandInfo, AnalysisData, Dict[str, Any]]:
-        if not self.api_key:
+        if not self.api_key or not self.client:
             raise ValueError("GEMINI_API_KEY is not configured in environment or .env file.")
 
         prompt = USER_PROMPT_TEMPLATE.format(context=context)
-
-        payload = {
-            "system_instruction": {
-                "parts": [{"text": SYSTEM_PROMPT}]
-            },
-            "contents": [
-                {
-                    "role": "user",
-                    "parts": [{"text": prompt}]
-                }
-            ],
-            "generationConfig": {
-                "temperature": 0.2,
-                "responseMimeType": "application/json"
-            }
-        }
-
-        api_endpoint = f"{self.base_url}?key={self.api_key}"
         start_time = time.perf_counter()
 
-        async with httpx.AsyncClient(timeout=60.0) as client:
-            try:
-                response = await client.post(api_endpoint, json=payload)
-                response.raise_for_status()
-            except httpx.HTTPStatusError as e:
-                status = e.response.status_code
-                error_body = e.response.text
-                raise ValueError(f"LLM API returned error {status}: {error_body}")
-            except httpx.RequestError as e:
-                raise ValueError(f"Failed to communicate with LLM API: {str(e)}")
+        try:
+            response = await asyncio.to_thread(
+                self.client.models.generate_content,
+                model=self.model,
+                contents=prompt,
+                config={
+                    "system_instruction": SYSTEM_PROMPT,
+                    "temperature": 0.2,
+                    "response_mime_type": "application/json"
+                }
+            )
+        except Exception as e:
+            raise ValueError(f"LLM API returned error: {str(e)}")
 
         elapsed = round(time.perf_counter() - start_time, 3)
-        res_json = response.json()
-
-        try:
-            raw_text = res_json["candidates"][0]["content"]["parts"][0]["text"]
-        except (KeyError, IndexError):
-            raise ValueError("LLM returned an empty or malformed candidate response.")
-
+        raw_text = response.text or ""
         cleaned_json = self._clean_json_response(raw_text)
+
         try:
             parsed_data = json.loads(cleaned_json)
         except json.JSONDecodeError as e:
             raise ValueError(f"Could not parse LLM output as JSON: {str(e)}. Raw text: {raw_text[:200]}")
 
-        usage = res_json.get("usageMetadata", {})
+        usage = response.usage_metadata
+        prompt_tokens = getattr(usage, "prompt_token_count", 0) if usage else 0
+        completion_tokens = getattr(usage, "candidates_token_count", 0) if usage else 0
+        total_tokens = getattr(usage, "total_token_count", 0) if usage else 0
 
         metadata = {
             "model_used": self.model,
             "response_time_seconds": elapsed,
-            "prompt_tokens": usage.get("promptTokenCount", 0),
-            "completion_tokens": usage.get("candidatesTokenCount", 0),
-            "total_tokens": usage.get("totalTokenCount", 0),
+            "prompt_tokens": prompt_tokens,
+            "completion_tokens": completion_tokens,
+            "total_tokens": total_tokens,
         }
 
         brand_dict = parsed_data.get("brand", {})
