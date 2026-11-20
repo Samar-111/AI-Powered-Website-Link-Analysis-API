@@ -104,7 +104,7 @@ uvicorn app.main:app --host 0.0.0.0 --port 4000 --reload
 - **URL**: `http://localhost:4000/link-analysis`
 - **Headers**: `Content-Type: application/json`
 
-### ScreenShots
+## ScreenShots
 <img width="1917" height="970" alt="Screenshot 2026-11-20 234416" src="https://github.com/user-attachments/assets/19dd0f0f-ecb1-49c3-a837-cf8a30624a36" />
 <img width="1912" height="970" alt="Screenshot 2026-11-20 234530" src="https://github.com/user-attachments/assets/559966d7-baad-4fc8-9304-267f9f7ab3eb" />
 <img width="1917" height="967" alt="Screenshot 2026-11-20 234548" src="https://github.com/user-attachments/assets/c0f96697-c389-4cac-b86a-feee9f9582cb" />
