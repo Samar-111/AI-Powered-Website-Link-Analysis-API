@@ -224,7 +224,7 @@ DASHBOARD_HTML = """<!DOCTYPE html>
   </main>
 
   <footer class="border-t border-slate-900 py-6 text-center text-xs text-slate-500">
-    <p>AI-Powered Website Link Analysis API • Candidate: <span class="text-slate-400 font-medium">Samar Anand</span> • Dxora Technologies Practical Test</p>
+    <p>AI-Powered Website Link Analysis API</p>
   </footer>
 
   <script>
