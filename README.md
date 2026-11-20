@@ -104,6 +104,21 @@ uvicorn app.main:app --host 0.0.0.0 --port 4000 --reload
 - **URL**: `http://localhost:4000/link-analysis`
 - **Headers**: `Content-Type: application/json`
 
+### ScreenShots
+<img width="1917" height="970" alt="Screenshot 2026-11-20 234416" src="https://github.com/user-attachments/assets/19dd0f0f-ecb1-49c3-a837-cf8a30624a36" />
+<img width="1912" height="970" alt="Screenshot 2026-11-20 234530" src="https://github.com/user-attachments/assets/559966d7-baad-4fc8-9304-267f9f7ab3eb" />
+<img width="1917" height="967" alt="Screenshot 2026-11-20 234548" src="https://github.com/user-attachments/assets/c0f96697-c389-4cac-b86a-feee9f9582cb" />
+<img width="1917" height="968" alt="Screenshot 2026-11-20 234558" src="https://github.com/user-attachments/assets/93489811-30e5-462b-a6b9-64a17c69c5e2" />
+<img width="1917" height="972" alt="Screenshot 2026-11-20 234605" src="https://github.com/user-attachments/assets/a9673454-1248-42dc-a804-641a524f85ce" />
+<img width="1917" height="968" alt="Screenshot 2026-11-20 234616" src="https://github.com/user-attachments/assets/a2b6e4a7-c402-4ec2-8e20-9c6a35bbeec4" />
+<img width="1917" height="970" alt="Screenshot 2026-11-20 234624" src="https://github.com/user-attachments/assets/9fe22301-dd08-4019-ad42-077e04205eca" />
+
+
+
+
+
+
+
 ### Sample Request
 ```json
 {
