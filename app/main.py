@@ -1,12 +1,13 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
 import uvicorn
 
 from app.config import settings
 from app.schemas import LinkAnalysisRequest, LinkAnalysisResponse, ErrorResponse
 from app.services.analysis_service import analysis_service
+from app.ui import DASHBOARD_HTML
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -41,7 +42,10 @@ async def value_error_handler(request, exc: ValueError):
     )
 
 @app.get("/", tags=["General"])
-async def root():
+async def root(request: Request):
+    accept_header = request.headers.get("accept", "")
+    if "text/html" in accept_header:
+        return HTMLResponse(content=DASHBOARD_HTML)
     return {
         "service": "AI-Powered Website Link Analysis API",
         "version": "1.0.0",
@@ -52,6 +56,11 @@ async def root():
             "health": "GET /health"
         }
     }
+
+@app.get("/ui", response_class=HTMLResponse, tags=["General"])
+@app.get("/demo", response_class=HTMLResponse, tags=["General"])
+async def interactive_demo():
+    return HTMLResponse(content=DASHBOARD_HTML)
 
 @app.get("/health", tags=["Health"])
 async def health_check():
