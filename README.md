@@ -561,27 +561,6 @@ To prevent **Server-Side Request Forgery (SSRF)** attacks, `app/utils/validators
 
 $$\text{Cost} = (\text{Input Tokens} \times \text{Input Price}) + (\text{Output Tokens} \times \text{Output Price})$$
 
-1. **Google Gemini 2.5 Flash**:
-   - Input: $4,200 \times \frac{\$0.075}{1,000,000} = \$0.000315$
-   - Output: $4,200 \times \frac{\$0.300}{1,000,000} = \$0.001260$
-   - **Total Cost per Analysis: ~\$0.00157 (Less than one-sixth of a cent!)**
-   - *Repeat cached requests*: **\$0.000000 (Free, 0ms LLM time)**
-
-2. **OpenAI GPT-4o-mini**:
-   - Input: $4,200 \times \frac{\$0.150}{1,000,000} = \$0.000630$
-   - Output: $4,200 \times \frac{\$0.600}{1,000,000} = \$0.002520$
-   - **Total Cost per Analysis: ~\$0.00315 (2x more expensive than Gemini)**
-
-3. **OpenAI GPT-4o**:
-   - Input: $4,200 \times \frac{\$2.50}{1,000,000} = \$0.01050$
-   - Output: $4,200 \times \frac{\$10.00}{1,000,000} = \$0.04200$
-   - **Total Cost per Analysis: ~\$0.05250 (33x more expensive!)**
-
-4. **Anthropic Claude 3.5 Sonnet**:
-   - Input: $4,200 \times \frac{\$3.00}{1,000,000} = \$0.01260$
-   - Output: $4,200 \times \frac{\$15.00}{1,000,000} = \$0.06300$
-   - **Total Cost per Analysis: ~\$0.07560 (48x more expensive!)**
-
 ### Cost Optimization Strategies
 
 1. **HTML Noise Elimination**: Before invoking the LLM, `website_extractor.py` strips `<script>`, `<style>`, `<svg>`, `<canvas>`, `<iframe>`, navigation headers, and inline CSS, reducing raw payload size by over **85%**.
