@@ -654,5 +654,4 @@ curl http://localhost:4000/health
 ---
 
 
-  - CREST Instagram: [https://www.instagram.com/crestspot/](https://www.instagram.com/crestspot/)
-- [x] Submission Email: Sent to `hr@chivoxai.com`.
+  
