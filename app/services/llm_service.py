@@ -156,7 +156,7 @@ class LLMService:
         if not key:
             raise ValueError("GEMINI_API_KEY is not configured in environment or .env file.")
         if self._client is None or getattr(self, "_active_key", "") != key:
-            self._client = genai.Client(api_key=key)
+            self._client = genai.Client(api_key=key, http_options={"api_version": "v1beta"})
             self._active_key = key
         return self._client
 
